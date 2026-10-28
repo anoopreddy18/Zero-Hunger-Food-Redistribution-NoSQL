@@ -21,3 +21,7 @@ Key MongoDB Features:
 Schema validation: Ensures donation ID exists and quantity is always a positive number.
 Indexing: Created indexes on status and category to quickly find available food.
 Aggregation: Groups donations to calculate total servings saved and view donation numbers by category.
+
+
+The project is deployed and live on Render:
+https://zero-hunger-food-redistribution-nosql.onrender.com/
