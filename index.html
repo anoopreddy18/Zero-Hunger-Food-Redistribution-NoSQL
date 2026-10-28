@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Food Surplus Redistribution Network</title>
+  <style>
+    /* -------------------------------------------------------------
+       1. BASIC STYLING & NEUTRAL THEME
+       ------------------------------------------------------------- */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f4f5f7;
+      color: #2d3748;
+      line-height: 1.5;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      background-color: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1a202c;
+    }
+
+    .brand p {
+      font-size: 0.85rem;
+      color: #718096;
+    }
+
+    /* Tab Navigation Buttons */
+    nav {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    nav button {
+      background: none;
+      border: 1px solid transparent;
+      padding: 0.55rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #4a5568;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    nav button:hover {
+      background-color: #edf2f7;
+      color: #1a202c;
+    }
+
+    nav button.active {
+      background-color: #2b6cb0;
+      color: #ffffff;
+    }
+
+    /* Main Container */
+    main {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    /* Section Tabs Display Logic */
+    .view-section {
+      display: none;
+    }
+
+    .view-section.active {
+      display: block;
+    }
+
+    /* Section Headers */
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #2d3748;
+    }
+
+    .section-desc {
+      font-size: 0.9rem;
+      color: #718096;
+      margin-bottom: 1.5rem;
+    }
+
+    /* -------------------------------------------------------------
+       2. AVAILABLE FOOD CARDS
+       ------------------------------------------------------------- */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .card-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+      background-color: #edf2f7;
+      color: #4a5568;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      color: #1a202c;
+    }
+
+    .card-detail {
+      font-size: 0.88rem;
+      color: #4a5568;
+      margin-bottom: 0.25rem;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .status-available {
+      background-color: #e6fffa;
+      color: #234e52;
+    }
+
+    .status-claimed {
+      background-color: #feebc8;
+      color: #7b341e;
+    }
+
+    .status-delivered {
+      background-color: #edf2f7;
+      color: #4a5568;
+    }
+
+    /* Generic Buttons */
+    .btn {
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+      background-color: #2b6cb0;
+      color: #ffffff;
+      border: none;
+      padding: 0.6rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn:hover {
+      background-color: #2c5282;
+    }
+
+    .btn:disabled {
+      background-color: #cbd5e0;
+      cursor: not-allowed;
+    }
+
+    /* -------------------------------------------------------------
+       3. SIMPLE CLEAN FORMS
+       ------------------------------------------------------------- */
+    .form-container {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      max-width: 600px;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+      color: #4a5568;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      border: 1px solid #cbd5e0;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: #3182ce;
+    }
+
+    /* -------------------------------------------------------------
+       4. SIMPLE TABLES (FOR SHELTERS & CLAIMS)
+       ------------------------------------------------------------- */
+    .table-container {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      overflow-x: auto;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f7fafc;
+      color: #4a5568;
+      font-weight: 700;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #edf2f7;
+      color: #2d3748;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .table-btn {
+      background-color: #319795;
+      color: #ffffff;
+      border: none;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .table-btn:hover {
+      background-color: #285e61;
+    }
+
+    /* -------------------------------------------------------------
+       5. SIMPLE CLAIM POPUP MODAL
+       ------------------------------------------------------------- */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.4);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 8px;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-content h3 {
+      font-size: 1.15rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .modal-content p {
+      font-size: 0.9rem;
+      color: #4a5568;
+      margin-bottom: 1rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
+    }
+
+    .btn-secondary {
+      background-color: #edf2f7;
+      color: #4a5568;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+      background-color: #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header>
+    <div class="brand">
+      <h1>Food Redistribution System</h1>
+      <p>Local surplus food coordination network</p>
+    </div>
+    <nav>
+      <button class="active" onclick="switchTab('tab-available', this)">Available Food</button>
+      <button onclick="switchTab('tab-donation', this)">+ Add Donation</button>
+      <button onclick="switchTab('tab-shelter', this)">+ Add Shelter / NGO</button>
+      <button onclick="switchTab('tab-claims', this)">Active Claims</button>
+    </nav>
+  </header>
+
+  <!-- Main Content Container -->
+  <main>
+
+    <!-- ==========================================
+         TAB 1: AVAILABLE FOOD POSTINGS
+         ========================================== -->
+    <section id="tab-available" class="view-section active">
+      <h2 class="section-title">Available Food Listings</h2>
+      <p class="section-desc">Browse surplus meals and click "Claim Food" to allocate them to a registered shelter.</p>
+      
+      <div id="donations-grid" class="cards-grid">
+        <!-- Rendered dynamically by JavaScript -->
+      </div>
+    </section>
+
+    <!-- ==========================================
+         TAB 2: ADD FOOD DONATION FORM
+         ========================================== -->
+    <section id="tab-donation" class="view-section">
+      <h2 class="section-title">Post a Surplus Food Donation</h2>
+      <p class="section-desc">Fill in the details of edible leftover food available for pickup.</p>
+
+      <div class="form-container">
+        <form id="donation-form" onsubmit="handleDonationSubmit(event)">
+          <div class="form-group">
+            <label for="food-item">Food Item Name *</label>
+            <input type="text" id="food-item" placeholder="e.g., Veg Biryani & Curry" required>
+          </div>
+
+          <div class="form-group">
+            <label for="food-category">Category *</label>
+            <select id="food-category" required>
+              <option value="Prepared Food">Prepared Food (Catering / Meals)</option>
+              <option value="Bakery">Bakery (Bread, Buns)</option>
+              <option value="Fresh Produce">Fresh Produce (Fruits, Vegetables)</option>
+              <option value="Packaged">Packaged / Dry Rations</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="food-qty">Quantity (servings or kg) *</label>
+            <input type="number" id="food-qty" min="1" placeholder="e.g., 35" required>
+          </div>
+
+          <div class="form-group">
+            <label for="donor-name">Donor / Restaurant Name *</label>
+            <input type="text" id="donor-name" placeholder="e.g., Green Palace Banquet" required>
+          </div>
+
+          <div class="form-group">
+            <label for="donor-phone">Contact Phone *</label>
+            <input type="tel" id="donor-phone" placeholder="e.g., 9876543210" required>
+          </div>
+
+          <div class="form-group">
+            <label for="donor-city">City / Location *</label>
+            <input type="text" id="donor-city" placeholder="e.g., Phagwara" required>
+          </div>
+
+          <button type="submit" class="btn">Submit Donation</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         TAB 3: ADD SHELTER / NGO FORM & DIRECTORY
+         ========================================== -->
+    <section id="tab-shelter" class="view-section">
+      <h2 class="section-title">Register Shelter or NGO</h2>
+      <p class="section-desc">Add recipient organizations so they can claim surplus food listings.</p>
+
+      <div class="form-container">
+        <form id="shelter-form" onsubmit="handleShelterSubmit(event)">
+          <div class="form-group">
+            <label for="shelter-name">Organization Name *</label>
+            <input type="text" id="shelter-name" placeholder="e.g., Hope Community Kitchen" required>
+          </div>
+
+          <div class="form-group">
+            <label for="shelter-contact">Contact Person *</label>
+            <input type="text" id="shelter-contact" placeholder="e.g., Sarah Johnson" required>
+          </div>
+
+          <div class="form-group">
+            <label for="shelter-phone">Phone Number *</label>
+            <input type="tel" id="shelter-phone" placeholder="e.g., 9123456780" required>
+          </div>
+
+          <div class="form-group">
+            <label for="shelter-city">City *</label>
+            <input type="text" id="shelter-city" placeholder="e.g., Jalandhar" required>
+          </div>
+
+          <button type="submit" class="btn">Register Shelter</button>
+        </form>
+      </div>
+
+      <!-- Shelters Table -->
+      <h3 style="margin-bottom: 0.75rem; font-size: 1.05rem;">Registered Shelters Directory</h3>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Organization</th>
+              <th>Contact Person</th>
+              <th>Phone</th>
+              <th>City</th>
+            </tr>
+          </thead>
+          <tbody id="shelters-table-body">
+            <!-- Rendered by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         TAB 4: ACTIVE CLAIMS & DELIVERIES
+         ========================================== -->
+    <section id="tab-claims" class="view-section">
+      <h2 class="section-title">Active Claims & Tracking</h2>
+      <p class="section-desc">Track which shelter claimed which food batch and update status to Delivered.</p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Claim ID</th>
+              <th>Food Item</th>
+              <th>Quantity</th>
+              <th>Claimed By (Shelter)</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="claims-table-body">
+            <!-- Rendered by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================
+       MODAL POPUP FOR CLAIMING FOOD
+       ========================================== -->
+  <div id="claim-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Claim Food Batch</h3>
+      <p id="claim-modal-item-name">Select the shelter receiving this food batch:</p>
+
+      <div class="form-group">
+        <label for="claim-shelter-select">Select Shelter / NGO *</label>
+        <select id="claim-shelter-select">
+          <!-- Populated from shelters data -->
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="closeClaimModal()">Cancel</button>
+        <button type="button" class="btn" style="width: auto; padding: 0.5rem 1rem;" onclick="confirmClaim()">Confirm Claim</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       JAVASCRIPT DATA MANAGEMENT & LOGIC
+       ========================================== -->
+  <script>
+    let donations = [];
+    let shelters = [];
+    let claims = [];
+    let activeDonationIdToClaim = null;
+
+    // Fetch live data directly from MongoDB via Python server
+    async function fetchAllData() {
+      try {
+        const [donRes, shlRes, clmRes] = await Promise.all([
+          fetch("/api/donations"),
+          fetch("/api/shelters"),
+          fetch("/api/claims")
+        ]);
+        donations = await donRes.json();
+        shelters = await shlRes.json();
+        claims = await clmRes.json();
+
+        renderDonations();
+        renderShelters();
+        renderClaims();
+      } catch (err) {
+        console.error("Error fetching live MongoDB data:", err);
+      }
+    }
+
+    function switchTab(sectionId, btnElement) {
+      document.querySelectorAll(".view-section").forEach(sec => sec.classList.remove("active"));
+      document.querySelectorAll("nav button").forEach(btn => btn.classList.remove("active"));
+
+      document.getElementById(sectionId).classList.add("active");
+      if (btnElement) btnElement.classList.add("active");
+
+      fetchAllData();
+    }
+
+    function renderDonations() {
+      const grid = document.getElementById("donations-grid");
+      grid.innerHTML = "";
+
+      if (donations.length === 0) {
+        grid.innerHTML = "<p style='color:#718096;'>No donations found in MongoDB.</p>";
+        return;
+      }
+
+      donations.forEach(item => {
+        const isAvailable = item.status === "Available";
+        const badgeClass = isAvailable ? "status-available" : (item.status === "Claimed" ? "status-claimed" : "status-delivered");
+
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <div>
+            <span class="card-tag">${item.category || "General"}</span>
+            <h3 class="card-title">${item.item_name}</h3>
+            <p class="card-detail"><strong>Quantity:</strong> ${item.quantity} servings / kg</p>
+            <p class="card-detail"><strong>Donor:</strong> ${item.donor_name}</p>
+            <span class="status-badge ${badgeClass}">${item.status}</span>
+          </div>
+          <div>
+            <button class="btn" ${isAvailable ? "" : "disabled"} onclick="openClaimModal('${item.donation_id}')">
+              ${isAvailable ? "Claim Food" : item.status}
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderShelters() {
+      const tbody = document.getElementById("shelters-table-body");
+      tbody.innerHTML = "";
+      shelters.forEach(s => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${s.shelter_id}</strong></td>
+          <td>${s.name}</td>
+          <td>${s.contact}</td>
+          <td>${s.city}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderClaims() {
+      const tbody = document.getElementById("claims-table-body");
+      tbody.innerHTML = "";
+
+      if (claims.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#a0aec0;">No claims found in MongoDB.</td></tr>`;
+        return;
+      }
+
+      claims.forEach(c => {
+        const isDelivered = c.status === "Delivered";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${c.claim_id}</strong></td>
+          <td>${c.item_name}</td>
+          <td>${c.shelter_name}</td>
+          <td>
+            <span class="status-badge ${isDelivered ? 'status-delivered' : 'status-claimed'}">
+              ${c.status}
+            </span>
+          </td>
+          <td>
+            ${isDelivered 
+              ? '<span style="color:#718096; font-size:0.8rem;">Completed</span>' 
+              : `<button class="table-btn" onclick="markDelivered('${c.donation_id}')">Mark Delivered</button>`
+            }
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function handleDonationSubmit(event) {
+      event.preventDefault();
+      const payload = {
+        item_name: document.getElementById("food-item").value.trim(),
+        category: document.getElementById("food-category").value,
+        quantity: parseInt(document.getElementById("food-qty").value),
+        donor_name: document.getElementById("donor-name").value.trim()
+      };
+
+      const res = await fetch("/api/donations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      alert(data.message);
+      document.getElementById("donation-form").reset();
+      switchTab("tab-available", document.querySelector("nav button:nth-child(1)"));
+    }
+
+    async function handleShelterSubmit(event) {
+      event.preventDefault();
+      const payload = {
+        name: document.getElementById("shelter-name").value.trim(),
+        contact: document.getElementById("shelter-phone").value.trim(),
+        city: document.getElementById("shelter-city").value.trim()
+      };
+
+      const res = await fetch("/api/shelters", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      alert(data.message);
+      document.getElementById("shelter-form").reset();
+      fetchAllData();
+    }
+
+    function openClaimModal(donationId) {
+      activeDonationIdToClaim = donationId;
+      const donation = donations.find(d => d.donation_id === donationId);
+      if (!donation) return;
+
+      document.getElementById("claim-modal-item-name").innerText = 
+        `Allocate "${donation.item_name}" (${donation.quantity} servings) to:`;
+
+      const select = document.getElementById("claim-shelter-select");
+      select.innerHTML = "";
+      shelters.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s.shelter_id;
+        opt.innerText = `${s.name} (${s.city})`;
+        select.appendChild(opt);
+      });
+
+      document.getElementById("claim-modal").classList.add("open");
+    }
+
+    function closeClaimModal() {
+      document.getElementById("claim-modal").classList.remove("open");
+      activeDonationIdToClaim = null;
+    }
+
+    async function confirmClaim() {
+      if (!activeDonationIdToClaim) return;
+      const shelterId = document.getElementById("claim-shelter-select").value;
+
+      const res = await fetch("/api/claim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ donation_id: activeDonationIdToClaim, shelter_id: shelterId })
+      });
+      const data = await res.json();
+      alert(data.message);
+      closeClaimModal();
+      fetchAllData();
+    }
+
+    async function markDelivered(donationId) {
+      const res = await fetch("/api/deliver", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ donation_id: donationId })
+      });
+      const data = await res.json();
+      fetchAllData();
+    }
+
+    // Load MongoDB data on start
+    window.onload = fetchAllData;
+  </script>
+</body>
+</html>

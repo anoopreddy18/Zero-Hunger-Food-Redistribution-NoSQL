@@ -1,0 +1,12 @@
+# Environment variables & secrets (NEVER COMMIT THIS)
+.env
+
+# Python bytecode and cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments (if used)
+venv/
+env/
+.venv/
